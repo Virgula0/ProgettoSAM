@@ -1,4 +1,5 @@
 import requests as r
+import urllib
 import sys
 
 class Shodan:
@@ -18,7 +19,8 @@ class Shodan:
 
     def __shodan_search(self, product, version) -> list:
         print(f"Searching for product... {product}")
-        cpes_response = (r.get(url=self.url.format(product = product))).json()[self.cpe_key]
+        product = urllib.parse.quote(product)
+        cpes_response = (r.get(url=self.url.format(product=product))).json()[self.cpe_key]
         print(f"Collected {len(cpes_response)} elements")
         collected = []
             
