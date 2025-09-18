@@ -7,11 +7,12 @@ class Sploitus:
     def __init__(self):
         self.__url = "https://sploitus.com/search"
         self.__CVE_REGEX =  r'CVE-\d{4}-\d{4,7}'
-    
-    def get_regex(self):
-        return self.__CVE_REGEX
+        self.pattern_error = "Not a valid CVE identifier"
 
     def search_sploitus_by_cve(self, cve: str) -> Tuple[Dict, int]:
+        
+        if re.match(self.__CVE_REGEX,cve) is None:
+            raise ValueError(self.pattern_error)
         
         payload = {
             "type": "exploits",
@@ -29,11 +30,9 @@ class Sploitus:
 # Tests from command line, not the prupose of this script
 # Usage: python3 sploitus.py CVE-2022-1271
 if __name__ == "__main__":
-    
     s = Sploitus()
-    
-    if len(sys.argv)<1 or sys.argv[1] is None or sys.argv[1] == "" or re.match(s.get_regex(),sys.argv[1]) is None:
-        exit("Not a valid CVE identifier")
+    if len(sys.argv)<1 or sys.argv[1] is None or sys.argv[1] == "":
+        exit(s.pattern_error)
 
     collected , length= s.search_sploitus_by_cve(cve=sys.argv[1])
     print("Found -> " , (collected,length))
