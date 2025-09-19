@@ -1,6 +1,7 @@
 from datetime import datetime
 import requests as r
 import os
+import urllib
 
 class Github:
     def __init__(self, github_access_token: str):
@@ -37,9 +38,9 @@ class Github:
         headers = {"Authorization": f"Bearer {self.github_access_token}"}
 
         response = (r.get(url=self.code_url.format(
-                        repository=repo,
-                        filename=filename,
-                        extension=extension,
+                        repository=urllib.parse.quote(repo),
+                        filename=urllib.parse.quote(filename),
+                        extension=urllib.parse.quote(extension),
                         per_page=per_page,
                         page=page),
                         headers=headers)).json()
