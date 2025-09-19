@@ -47,7 +47,7 @@ class Github:
         
         return response 
 
-# Tests from command line, not the prupose of this script
+# Tests from command line, not the purpose of this script
 if __name__ == "__main__":
     if (token := os.environ.get("GITHUB_ACCESS_TOKEN")) is None:
         exit("Please set environment variable GITHUB_ACCESS_TOKEN")
@@ -56,4 +56,4 @@ if __name__ == "__main__":
     
     #print(g.call_repository_api(language="js", per_page=1))
 
-    print(g.call_code_api("facebook/react", "package", "json"))
+    print(g.call_code_api("facebook/react", "package", "json", per_page=1))
