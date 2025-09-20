@@ -29,6 +29,9 @@ class PackageJson(DependencyFile):
         
         if 'devDependencies' in json_content:
             output_set.update(set(json_content['devDependencies'].items()))
+            
+        if 'bundleDependencies' in json_content:
+            output_set.update(set(json_content['bundleDependencies'].items()))
         
         if 'dependencies' in json_content:
             output_set.update(set(json_content['dependencies'].items()))
