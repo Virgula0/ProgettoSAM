@@ -38,9 +38,9 @@ class Github:
         headers = {"Authorization": f"Bearer {self.github_access_token}"}
 
         response = (r.get(url=self.code_url.format(
-                        repository=urllib.parse.quote(repo),
-                        filename=urllib.parse.quote(filename),
-                        extension=urllib.parse.quote(extension),
+                        repository=urllib.parse.quote_plus(repo),
+                        filename=urllib.parse.quote_plus(filename),
+                        extension=urllib.parse.quote_plus(extension),
                         per_page=per_page,
                         page=page),
                         headers=headers)).json()
