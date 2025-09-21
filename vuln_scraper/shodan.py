@@ -18,10 +18,8 @@ class Shodan:
         return None
 
     def __shodan_search(self, product, version) -> list:
-        print(f"Searching for product... {product}")
-        product = urllib.parse.quote(product)
+        product = urllib.parse.quote_plus(product)
         cpes_response = (r.get(url=self.url.format(product=product))).json()[self.cpe_key]
-        print(f"Collected {len(cpes_response)} elements")
         collected = []
             
         for x in cpes_response:
