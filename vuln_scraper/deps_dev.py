@@ -19,7 +19,7 @@ class DepsDev:
         if re.match(self.__version_regex, version) is None:
             raise ValueError(self.__version_error)
         
-        response = r.get(url=self.__url.format(product=urllib.parse.quote_plus(product),version=urllib.parse.quote_plus(version)))
+        response = r.get(url=self.__url.format(product=urllib.parse.quote_plus(product),version=urllib.parse.quote_plus(version)),timeout=10)
 
         if response.status_code == 404:
             return None

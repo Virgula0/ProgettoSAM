@@ -20,7 +20,7 @@ class OSDev:
         
         payload = {"version": version,"package": {"name": product, "ecosystem": "npm"}}
 
-        return (r.post(self.__url, json=payload)).json()
+        return (r.post(self.__url, json=payload,timeout=10)).json()
         
 
 # Tests from command line, not the prupose of this script

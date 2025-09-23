@@ -23,7 +23,7 @@ class Shodan:
         scope, name = match.groups()
         return scope if scope else name
 
-    def shodan_engine(self, product: str, version:str) -> list:
+    def shodan_engine(self, product: str, version:str) -> list|None:
 
         if re.match(self.__product_regex, product) is None:
             raise ValueError(self.__product_error)
@@ -36,14 +36,14 @@ class Shodan:
         collected = self.__shodan_search(product=product, version=version)
         
         if len(collected) > 0:
-            return self.__shodan_cpe_search(product=product, version=version , collected=collected)
+            return self.__shodan_cpe_search(collected=collected)
             
         return None
 
     def __shodan_search(self, product, version) -> list:
         product = urllib.parse.quote_plus(product)
         
-        response = r.get(url=self.url.format(product=product))
+        response = r.get(url=self.url.format(product=product),timeout=10)
 
         if response.status_code == 404:
             return []
@@ -57,15 +57,52 @@ class Shodan:
 
         return collected
 
-    def __shodan_cpe_search(self, product, version, collected) -> dict:
-        vuln_collected = {}  
+    def __shodan_cpe_search(self, collected) -> list:
+        vuln_collected = []  
         for x in collected:
-            vuln_response = ((r.get(url=self.cpe.format(cpe=x))).json())[self.cve_key]
-            for el in vuln_response:
-                vuln_collected[product+":"+version+":"+el['cve_id']] = vuln_response
+            vuln_response = ((r.get(url=self.cpe.format(cpe=x),timeout=10)).json())[self.cve_key]
+            vuln_collected.append(vuln_response[0] if type(vuln_response) is list else vuln_response) # don't know why sometimes is a list and sometimes a dict
         
         return vuln_collected
 
+
+"""
+response example
+{
+   "cve_id":"CVE-2022-1271",
+   "summary":"An arbitrary file write vulnerability was found in GNU gzip's zgrep utility. When zgrep is applied on the attacker's chosen file name (for example, a crafted file name), this can overwrite an attacker's content to an arbitrary attacker-selected file. This flaw occurs due to insufficient validation when processing filenames with two or more newlines where selected content and the target file names are embedded in crafted multi-line file names. This flaw allows a remote, low privileged attacker to force zgrep to write arbitrary files on the system.",
+   "cvss":8.8,
+   "cvss_version":3.0,
+   "cvss_v2":"None",
+   "cvss_v3":8.8,
+   "epss":0.00716,
+   "ranking_epss":0.71553,
+   "kev":false,
+   "propose_action":"None",
+   "ransomware_campaign":"None",
+   "references":[
+      "https://access.redhat.com/security/cve/CVE-2022-1271",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2073310",
+      "https://git.tukaani.org/?p=xz.git%3Ba=commit%3Bh=69d1b3fc29677af8ade8dc15dba83f0589cb63d6",
+      "https://lists.gnu.org/r/bug-gzip/2022-04/msg00011.html",
+      "https://security-tracker.debian.org/tracker/CVE-2022-1271",
+      "https://security.gentoo.org/glsa/202209-01",
+      "https://security.netapp.com/advisory/ntap-20220930-0006/",
+      "https://tukaani.org/xz/xzgrep-ZDI-CAN-16587.patch",
+      "https://www.openwall.com/lists/oss-security/2022/04/07/8",
+      "https://access.redhat.com/security/cve/CVE-2022-1271",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2073310",
+      "https://git.tukaani.org/?p=xz.git%3Ba=commit%3Bh=69d1b3fc29677af8ade8dc15dba83f0589cb63d6",
+      "https://lists.gnu.org/r/bug-gzip/2022-04/msg00011.html",
+      "https://security-tracker.debian.org/tracker/CVE-2022-1271",
+      "https://security.gentoo.org/glsa/202209-01",
+      "https://security.netapp.com/advisory/ntap-20220930-0006/",
+      "https://tukaani.org/xz/xzgrep-ZDI-CAN-16587.patch",
+      "https://www.openwall.com/lists/oss-security/2022/04/07/8"
+   ],
+   "published_time":"2022-08-31T16:15:09"
+}
+"""
 
 # Tests from command line, not the prupose of this script
 # Usage: python3 shodan.py '@babel/cli' 7.10.5

@@ -22,9 +22,9 @@ class Sploitus:
             "offset": 0
         }    
         
-        with httpx.Client(http2=True, timeout=15) as client:
+        with httpx.Client(http2=True, timeout=10) as client:
             jj = (client.post(self.__url, json=payload)).json() # Uses http2 by default
-            return jj, jj['exploits_total']
+            return jj, int(jj['exploits_total']) if 'exploits_total' in jj else 0
             
 
 # Tests from command line, not the prupose of this script
