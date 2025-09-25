@@ -19,7 +19,7 @@ class Builder:
     def __init__(self, 
                  language_dict: Mapping[str, Mapping[str, DependencyFile]],
                  github: Github,
-                 star_ranges: List[str] = [">1800"], #["19..22", "50..65", "150..240", "450..999", ">1800"],
+                 star_ranges: List[str] = ["19..22", "50..65", "150..240", "450..999", ">1800"],
                  output_folder: str = "./output"):
         self.language_dict = language_dict
         self.github = github

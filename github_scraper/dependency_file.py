@@ -21,7 +21,6 @@ class PackageJson(DependencyFile):
     filename = "package.json"
     
     def __init__(self):
-        #self.version_regex = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|[a-zA-Z-][0-9a-zA-Z-]*))*)?(?:\+[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)?$"
         self.version_regex = r"^[~^]?(\d+\.\d+\.\d+)$"
         
     def download_file(self, raw_url: str) -> str:

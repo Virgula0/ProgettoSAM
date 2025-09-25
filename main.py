@@ -19,16 +19,6 @@ if __name__ == "__main__":
     
     if (token := os.environ.get("GITHUB_ACCESS_TOKEN")) is None:
         exit("Please set environment variable GITHUB_ACCESS_TOKEN")
-    """
-    
-    shodan_results = shodan.shodan_engine("xz","5.1.0")
-    
-    if shodan_results is not None:
-        for result in shodan_results: # result is in the format product:version:cve of vulnerables found
-            #print(result)
-            cve = result['cve_id'] # get cve only
-            print(sploitus.search_sploitus_by_cve(cve=cve))
-    """
     
     b = Builder({"js": {"package.json": PackageJson()}}, Github(token))
     
