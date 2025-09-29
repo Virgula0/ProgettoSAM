@@ -210,9 +210,8 @@ def process_csv(df) -> set:
         # Split by comma, strip whitespace
         for cve in str(val).split(","):
             cve = cve.strip()
-            if cve:  # ensure non-empty
-                if cve.startswith("CVE"): # other junk format may be present in the csv
-                    cves.add(cve)
+            if cve and cve.startswith("CVE"):  # ensure non-empty and other junk format may be present in the csv
+                cves.add(cve)
                     
     return cves
 
@@ -245,7 +244,8 @@ if __name__ == '__main__':
         count+=1 
         print(f"Reached {count} over {len(cves)}")
         result = mitre_request(cve)
-        with open(os.path.join(os.path.join(output_dir,out_file_name)), "a", newline="", encoding="utf-8") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=keys)
-            writer.writerow(result)
+        if result:
+            with open(os.path.join(os.path.join(output_dir,out_file_name)), "a", newline="", encoding="utf-8") as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=keys)
+                writer.writerow(result)
         
