@@ -1,14 +1,9 @@
-from vuln_scraper.shodan import Shodan
-from vuln_scraper.sploitus import Sploitus
 from csv_builder.builder import Builder
 from github_scraper.dependency_file import PackageJson
 from github_scraper.github import Github
 import os
 
 if __name__ == "__main__":
-    # Test
-    shodan = Shodan()
-    sploitus = Sploitus()
 
     """
         DEPS_DEV -> return a json always for any existing version, then advisoryKeys array must be checked for the presence of vulnerabilities
