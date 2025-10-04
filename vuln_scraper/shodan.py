@@ -7,12 +7,15 @@ class Shodan:
     def __init__(self):
         self.url = "https://cvedb.shodan.io/cpes?product={product}"
         self.cpe =  "https://cvedb.shodan.io/cves?cpe23={cpe}"
+        self.cve_url = "https://cvedb.shodan.io/cve/{cve}"
+        self.__cve_regex = r'CVE-\d{4}-\d{4,7}'
         self.__product_regex = r'^(?:@([a-z0-9][a-z0-9._-]*)/)?([a-z0-9][a-z0-9._-]*)$'
         self.__version_regex = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|[a-zA-Z-][0-9a-zA-Z-]*))*)?(?:\+[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)?$"
         self.cpe_key = "cpes"
         self.cve_key = "cves"
         self.__product_error = "Regex does not match the format of npm package"
         self.__version_error = "Version format of npm package not valid"
+        self.__cve_error_regex="Passed argument does not match cve format for {cve}"
 
     def __extract_simple_product(self, product):
         match = re.compile(self.__product_regex).fullmatch(product.strip())
@@ -64,6 +67,25 @@ class Shodan:
             vuln_collected.append(vuln_response[0] if type(vuln_response) is list else vuln_response) # don't know why sometimes is a list and sometimes a dict
         
         return vuln_collected
+    
+    def shodan_search_by_cve(self, cve) -> dict:
+
+        if re.match(self.__cve_regex , cve) is None:
+            raise ValueError(self.__cve_error_regex.format(cve=cve))
+        
+        built_url = self.cve_url.format(cve=cve)              
+        response = r.get(url=built_url,timeout=10)
+        
+        if response.status_code != 200:
+            return {}
+        
+        jsoned = response.json()
+        
+        return {
+            'epss' : jsoned['epss'] if 'epss' in jsoned else '',
+            'ranking_epss': jsoned['ranking_epss'] if 'ranking_epss' in jsoned else ''
+        }
+        
 
 # Tests from command line, not the prupose of this script
 # Usage: python3 shodan.py '@babel/cli' 7.10.5
