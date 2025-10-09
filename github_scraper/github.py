@@ -3,6 +3,7 @@ from typing import List, Mapping
 import requests as r
 import os
 import urllib
+import re
 
 from time import sleep
 
@@ -11,6 +12,9 @@ class Github:
         self.github_access_token = github_access_token
         self.repository_url = "https://api.github.com/search/repositories?q=language:{language}+size:<{size_up_limit}+stars:{stars}+archived:=false+pushed:{last_commit_pushed_after}..{today}&per_page={per_page}&page={page}"
         self.contents_url = "https://api.github.com/repos/{repo_full_name}/contents/{path}"
+        self.number_of_commits_url = "https://api.github.com/repos/{repo_full_name}/commits?per_page=1&page=1&anon=true"
+        self.number_of_contributors_url = "https://api.github.com/repos/{repo_full_name}/contributors?per_page=1&page=1&anon=true"
+        self.bytes_of_code_url = "https://api.github.com/repos/{repo_full_name}/languages"
         self.blocked = "API rate limit exceeded for user ID"
         self.blocked_sleep = 120
 
@@ -50,6 +54,78 @@ class Github:
                 headers=headers)).json()
         
         return response
+    
+    def get_number_of_commits(self,
+                              repo_full_name: str) -> int:    
+        number_of_commits = 1
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.github_access_token}"}
+
+            response = (r.get(url=self.number_of_commits_url.format(repo_full_name=repo_full_name),headers=headers)).headers
+                
+            while self.__check_blocked(response):
+                print(f"Github API Rate limit reached, sleeping for {self.blocked_sleep/60} minutes... ")
+                sleep(self.blocked_sleep)
+                response = (r.get(url=self.number_of_commits_url.format(repo_full_name=repo_full_name),headers=headers)).headers
+
+            s = response["Link"]
+            match = re.search(r'page=(\d+)&anon=true>; rel="last"', s)
+            if match:
+                number_of_commits = match.group(1)
+                
+            number_of_commits = int(number_of_commits)
+        except Exception as ex:
+            print("Exception occurred " + str(ex))
+        
+        return number_of_commits
+        
+    
+    def get_number_of_contributors(self,
+                                   repo_full_name: str) -> int:
+        number_of_contributors = 1
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.github_access_token}"}
+
+            response = (r.get(url=self.number_of_contributors_url.format(repo_full_name=repo_full_name),headers=headers)).headers
+                
+            while self.__check_blocked(response):
+                print(f"Github API Rate limit reached, sleeping for {self.blocked_sleep/60} minutes... ")
+                sleep(self.blocked_sleep)
+                response = (r.get(url=self.number_of_contributors_url.format(repo_full_name=repo_full_name),headers=headers)).headers
+
+            s = response["Link"]
+            match = re.search(r'page=(\d+)&anon=true>; rel="last"', s)
+            if match:
+                number_of_contributors = match.group(1)
+                
+            number_of_contributors = int(number_of_contributors)
+        except Exception as ex:
+            print("Exception occurred " + str(ex))
+        
+        return number_of_contributors
+    
+    def get_bytes_of_language(self,
+                               repo_full_name: str,
+                               language: str) -> int:
+        bytes_of_language = 0
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.github_access_token}"}
+
+            response = (r.get(url=self.bytes_of_code_url.format(repo_full_name=repo_full_name),headers=headers)).json()
+            
+            while self.__check_blocked(response):
+                print(f"Github API Rate limit reached, sleeping for {self.blocked_sleep/60} minutes... ")
+                sleep(self.blocked_sleep)
+                response = (r.get(url=self.bytes_of_code_url.format(repo_full_name=repo_full_name),headers=headers)).json()
+            
+            bytes_of_language = int(response[language])
+        except Exception as ex:
+            print("Exception occurred " + str(ex))
+        
+        return bytes_of_language
     
     def get_files_from_repo(self,
                             repo_full_name: str,

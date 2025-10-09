@@ -124,6 +124,45 @@ class Builder:
             
         with self.mutex:
             self.threads_number-=1
+            
+    def build_demographics(self, repositories: List[str], language: str):
+        with open(os.path.join(self.output_folder, "demographics.csv"), "w", newline="", encoding="utf-8") as csvfile:
+                    keys = [
+                            "repository",
+                            "number_of_commits",
+                            "number_of_contributors",
+                            "bytes_of_code"
+                    ]
+                    writer = csv.DictWriter(csvfile, fieldnames=keys)
+                    writer.writeheader()
+        
+        for i, repo in enumerate(repositories):
+            print(f"Now doing repo number {i}: {repo}")
+            
+            try:
+                number_of_commits = self.github.get_number_of_commits(repo)
+                number_of_contributors = self.github.get_number_of_contributors(repo)
+                bytes_of_code = self.github.get_bytes_of_language(repo, language)
+                
+                csv_output = {
+                    "repository": repo,
+                    "number_of_commits": number_of_commits,
+                    "number_of_contributors": number_of_contributors,
+                    "bytes_of_code": bytes_of_code
+                }
+
+                # Flatten the dictionary
+                flat_output = self.flatten_dict(csv_output)
+
+                # Write to CSV
+                with open(os.path.join(self.output_folder, "demographics.csv"), "a", newline="", encoding="utf-8") as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=flat_output.keys())
+                    writer.writerow(flat_output)
+            except Exception as ex:
+                print("Exception occurred " + str(ex))
+                continue
+        
+        print("FINISH")
                 
     def build_all_csv(self, results_per_page:int=100, verbose:bool=False):
         if verbose: print("Starting CSV build loop")
